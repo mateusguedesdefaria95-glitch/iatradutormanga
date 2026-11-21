@@ -1,0 +1,2 @@
+chrome.runtime.onInstalled.addListener(()=>{chrome.storage.sync.get({autoTranslate:false,hoverButton:true},s=>chrome.storage.sync.set(s));});
+chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{if(message.type==="OPEN_UPLOAD"){chrome.tabs.create({url:chrome.runtime.getURL("upload.html")});sendResponse({ok:true});}return true;});
