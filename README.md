@@ -85,3 +85,18 @@ Na pasta `extension`: `npm run typecheck` e `npm run build`.
 - A imagem é enviada ao backend local configurado pela pessoa usuária.
 - Não versionar chaves de API ou segredos.
 - Não exponha o backend publicamente sem autenticação, proteção contra abuso e CORS apropriado.
+
+---
+
+## Extensão alternativa com popup inspirado em tradutores imersivos
+
+Também há uma versão independente e simples, carregável diretamente pelo Chrome/Edge, na raiz do repositório. Ela inclui popup com idioma/modelo/escopo, botão flutuante em imagens, página de upload, opções e restauração da imagem original.
+
+### Testar a versão de popup
+1. Baixe ou clone o repositório.
+2. Abra `chrome://extensions` ou `edge://extensions`.
+3. Ative o modo do desenvolvedor.
+4. Clique em **Carregar sem compactação** e selecione a pasta raiz do repositório.
+5. Abra as configurações da extensão e informe a URL de um backend compatível com o contrato abaixo.
+
+O endpoint de tradução deve receber `POST` JSON com `image`, `targetLanguage` e `model`, e retornar `{ "translatedImage": "data:image/png;base64,..." }`. Esta interface é um protótipo funcional de extensão; a tradução efetiva depende da implementação e configuração do backend de OCR/tradução/inpainting. Tradução em lote e pré-tradução ainda estão no roadmap.
