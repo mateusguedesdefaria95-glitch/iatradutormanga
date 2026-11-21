@@ -1,0 +1,7 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Configurações — MangaTradutor AI</title><link rel="stylesheet" href="options.css"></head><body><main><h1>Configurações</h1><p>Conecte o serviço responsável por OCR, tradução e reconstrução das imagens.</p><label>URL do servidor de tradução<input id="apiUrl" type="url" placeholder="http://localhost:8000/translate"></label><label>Chave de API (opcional)<input id="apiKey" type="password" placeholder="Sua chave, se o servidor exigir"></label><label>Modelo preferido<input id="modelName" type="text" placeholder="gpt-4.1-mini"></label><button id="save">Salvar configurações</button><p id="status" role="status"></p><h2>Formato esperado do servidor</h2><pre>POST /translate
+{ "image": "data:image/png;base64,...",
+  "targetLanguage": "Português (Brasil)",
+  "model": "gpt-4.1-mini" }
+
+Resposta:
+{ "translatedImage": "data:image/png;base64,..." }</pre><p>As imagens são enviadas somente ao servidor que você configurar. Não insira chaves em repositórios públicos.</p></main><script src="options.js"></script></body></html>
