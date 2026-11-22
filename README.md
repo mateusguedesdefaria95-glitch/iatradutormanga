@@ -2,7 +2,7 @@
 
 Extensão para Chrome e Microsoft Edge com backend local para detecção de imagens, OCR e tradução de páginas de mangá.
 
-## Estado do projeto — v0.5.0 (integração inicial)
+## Estado do projeto — v0.6.0 (fila de tradução em lote)
 
 ### Extensão
 - Manifest V3 para Chrome e Edge.
@@ -13,6 +13,7 @@ Extensão para Chrome e Microsoft Edge com backend local para detecção de imag
 - Botão **Traduzir** sobre cada imagem detectada.
 - Fluxo integrado: captura da imagem → OCR → tradução dos trechos.
 - Exibição da tradução em um painel abaixo da imagem.
+- Fila de tradução em lote, processada sequencialmente, com progresso, contagem de sucessos/falhas e cancelamento.
 - Remoção dos painéis de tradução pela ação Restaurar.
 
 ### Backend
@@ -101,13 +102,15 @@ Na pasta `extension`: `npm run typecheck` e `npm run build`.
 - `docs/ETAPA_3.md` — OCR e pipeline de imagem.
 - `docs/ETAPA_4.md` — endpoint de tradução.
 - `docs/ETAPA_5.md` — integração inicial entre extensão, OCR e tradução.
+- `docs/ETAPA_6.md` — fila de tradução em lote.
 
 ## Limitações conhecidas
 - A detecção de páginas usa heurísticas; não é um classificador treinado.
 - Captura via canvas pode falhar em imagens de outros domínios sem CORS.
 - OCR japonês retorna o texto da página como uma única região; OCR multilíngue pode retornar várias regiões.
 - A tradução é exibida abaixo da imagem, não dentro dos balões.
-- Ainda não há remoção do texto original, inpainting, lettering, tradução automática em lote nem leitor CBR/CBZ.
+- Ainda não há remoção do texto original, inpainting, lettering ou leitor CBR/CBZ.
+- O lote processa apenas imagens HTML acessíveis e elegíveis; imagens protegidas por CORS podem falhar individualmente.
 - A extensão React/Vite ainda não foi consolidada com a interface simples da raiz.
 
 ## Privacidade e segurança
