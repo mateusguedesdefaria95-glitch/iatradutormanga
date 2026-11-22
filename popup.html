@@ -1,72 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>MangaTradutor AI</title>
-  <link rel="stylesheet" href="popup.css">
-</head>
-<body>
-  <header class="topbar">
-    <strong class="brand">MangaTradutor <span>AI</span></strong>
-    <button id="openOptions" class="icon-button" title="Configurações" aria-label="Configurações">⚙</button>
-  </header>
-
-  <main>
-    <section class="panel auto-panel">
-      <div class="auto-head">
-        <div><strong>Traduzir este site automaticamente</strong><small id="autoState">Desativado</small></div>
-        <label class="switch"><input id="autoTranslate" type="checkbox"><span></span></label>
-      </div>
-      <div class="choice-row">
-        <label class="choice"><input type="radio" name="scope" value="all" checked> Páginas de todo o site</label>
-        <label class="choice"><input type="radio" name="scope" value="similar"> Apenas caminho semelhante</label>
-      </div>
-      <button id="siteHelp" class="text-link">Site não suportado?</button>
-    </section>
-
-    <section class="panel settings">
-      <div class="setting-row">
-        <label for="targetLanguage">🌐 Traduzir para:</label>
-        <select id="targetLanguage">
-          <option value="Português (Brasil)">Português (Brasil)</option>
-          <option value="English">English</option><option value="Español">Español</option>
-          <option value="日本語">日本語</option><option value="한국어">한국어</option>
-          <option value="中文">中文</option><option value="Français">Français</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <label for="model">Modelo</label>
-        <select id="model">
-          <option value="gpt-4.1-mini">GPT-4.1 mini</option>
-          <option value="gpt-4.1">GPT-4.1</option>
-          <option value="custom">Servidor personalizado</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <label>Alcance das imagens</label>
-        <div class="segmented"><button class="active" data-scope="viewport">Janela</button><button data-scope="page">Página inteira</button></div>
-      </div>
-      <div class="setting-row">
-        <div><label for="pretranslate">Pré-traduzir próxima página</label><small>A pré-tradução pode consumir créditos</small></div>
-        <label class="switch"><input id="pretranslate" type="checkbox"><span></span></label>
-      </div>
-      <div class="setting-row">
-        <label for="hoverButton">Botão de tradução ao passar</label>
-        <label class="switch"><input id="hoverButton" type="checkbox" checked><span></span></label>
-      </div>
-    </section>
-
-    <section class="panel upload-panel">
-      <button id="openUpload" class="upload-button">⇧ &nbsp; Abrir página de envio de imagens</button>
-      <p>Escolha, traduza e baixe imagens em uma página separada.</p>
-    </section>
-    <div class="actions">
-      <button id="translatePage" class="primary">↻ &nbsp; Traduzir imagens desta página</button>
-      <button id="restorePage" class="secondary" title="Restaurar imagens originais">Restaurar</button>
-    </div>
-    <p id="status" class="status" role="status"></p>
-  </main>
-  <script src="popup.js"></script>
-</body>
-</html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MangaTradutor AI</title><link rel="stylesheet" href="popup.css"></head>
+<body><header class="topbar"><strong class="brand">MangaTradutor <span>AI</span></strong><button id="openOptions" class="icon-button" title="Configurações" aria-label="Configurações">⚙</button></header>
+<main>
+<section class="panel auto-panel"><div class="auto-head"><div><strong>Traduzir este site automaticamente</strong><small id="autoState">Desativado</small></div><label class="switch"><input id="autoTranslate" type="checkbox"><span></span></label></div><div class="choice-row"><label class="choice"><input type="radio" name="scope" value="all" checked> Páginas de todo o site</label><label class="choice"><input type="radio" name="scope" value="similar"> Apenas caminho semelhante</label></div><button id="siteHelp" class="text-link">Site não suportado?</button></section>
+<section class="panel settings"><div class="setting-row"><label for="targetLanguage">🌐 Traduzir para:</label><select id="targetLanguage"><option value="Português (Brasil)">Português (Brasil)</option><option value="English">English</option><option value="Español">Español</option><option value="日本語">日本語</option><option value="한국어">한국어</option><option value="中文">中文</option><option value="Français">Français</option></select></div><div class="setting-row"><label for="model">Modelo</label><select id="model"><option value="gpt-4.1-mini">GPT-4.1 mini</option><option value="gpt-4.1">GPT-4.1</option><option value="custom">Servidor personalizado</option></select></div><div class="setting-row"><label>Alcance das imagens</label><div class="segmented"><button class="active" data-scope="viewport">Janela</button><button data-scope="page">Página inteira</button></div></div><div class="setting-row"><div><label for="pretranslate">Pré-traduzir próxima página</label><small>A pré-tradução pode consumir créditos</small></div><label class="switch"><input id="pretranslate" type="checkbox"><span></span></label></div><div class="setting-row"><label for="hoverButton">Botão de tradução ao passar</label><label class="switch"><input id="hoverButton" type="checkbox" checked><span></span></label></div></section>
+<section class="panel upload-panel"><button id="openUpload" class="upload-button">⇧ &nbsp; Abrir página de envio de imagens</button><p>Escolha, traduza e baixe imagens em uma página separada.</p></section>
+<section class="panel batch-panel"><strong>Tradução em lote</strong><p>Processa as imagens elegíveis uma por vez para reduzir consumo de memória e evitar sobrecarga do servidor.</p><progress id="batchProgress" max="1" value="0"></progress><small id="batchState">Aguardando</small><small id="batchCounts"></small><div class="actions"><button id="translateAll" class="primary">Traduzir tudo</button><button id="cancelBatch" class="secondary">Cancelar</button></div></section>
+<div class="actions"><button id="translatePage" class="secondary">Detectar imagens</button><button id="restorePage" class="secondary" title="Restaurar imagens originais">Restaurar</button></div><p id="status" class="status" role="status"></p></main><script src="popup.js"></script></body></html>
