@@ -1,5 +1,5 @@
+import json
 import os
-from typing import Literal
 
 import httpx
 from pydantic import BaseModel, Field, field_validator
@@ -75,7 +75,7 @@ async def translate_texts(request: TranslationRequest) -> dict:
                     "response_format": {"type": "json_object"},
                     "messages": [
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": __import__("json").dumps(user_payload, ensure_ascii=False)},
+                        {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
                     ],
                 },
             )
@@ -91,7 +91,7 @@ async def translate_texts(request: TranslationRequest) -> dict:
 
     try:
         content = payload["choices"][0]["message"]["content"]
-        result = __import__("json").loads(content)
+        result = json.loads(content)
         translations = result["translations"]
         if (
             not isinstance(translations, list)
