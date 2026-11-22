@@ -1,8 +1,8 @@
 # MangaTradutor AI
 
-Extensão para Chrome e Microsoft Edge com backend local para leitura assistida e OCR de páginas de mangá.
+Extensão para Chrome e Microsoft Edge com backend local para leitura assistida, OCR e tradução de páginas de mangá.
 
-## Estado atual — v0.3.0
+## Estado atual — backend v0.4.0
 
 ### Extensão
 - Manifest V3 para Chrome e Edge.
@@ -15,10 +15,13 @@ Extensão para Chrome e Microsoft Edge com backend local para leitura assistida 
 
 ### Backend
 - API FastAPI local.
-- Endpoint `GET /health`.
-- Endpoint `POST /ocr` com validação de imagem.
+- Endpoint de saúde `GET /health`.
+- Endpoint OCR `POST /ocr` com validação de imagem.
 - Adaptador japonês opcional `manga-ocr`.
 - Adaptador multilíngue opcional EasyOCR para coreano, chinês simplificado e inglês.
+- Endpoint `POST /translate` para traduzir uma lista ordenada de trechos.
+- Integração configurável com provedores compatíveis com OpenAI Chat Completions.
+- Chaves de API mantidas no ambiente do backend, nunca na extensão.
 
 ## Requisitos
 - Node.js 20+ e npm 10+.
@@ -52,15 +55,48 @@ pip install -r backend/requirements.txt
 uvicorn backend.app.main:app --host 127.0.0.1 --port 8765 --reload
 ```
 
-### Instalar OCR opcional
+### Configurar tradução
 
-Japonês: `pip install -r backend/requirements-ocr-ja.txt`
+Configure as variáveis no ambiente antes de iniciar o backend:
 
-Coreano, chinês simplificado e inglês: `pip install -r backend/requirements-ocr-multilingual.txt`
+```bash
+MANGA_TRANSLATION_API_KEY=sua_chave
+MANGA_TRANSLATION_API_URL=https://api.openai.com/v1/chat/completions
+MANGA_TRANSLATION_MODEL=gpt-4o-mini
+```
+
+A URL e o modelo podem ser ajustados para um provedor compatível com o formato Chat Completions. A chave não deve ser enviada pela extensão nem salva no GitHub. Sem chave, OCR continua disponível, mas `POST /translate` responde com HTTP 503 e uma mensagem de configuração.
+
+Exemplo de requisição:
+
+```json
+{
+  "texts": ["こんにちは", "待って！"],
+  "source_language": "ja",
+  "target_language": "pt-BR",
+  "context": "Dois colegas conversando informalmente."
+}
+```
+
+### Instalar um mecanismo OCR
+
+Japonês:
+
+```bash
+pip install -r backend/requirements-ocr-ja.txt
+```
+
+Coreano, chinês simplificado e inglês:
+
+```bash
+pip install -r backend/requirements-ocr-multilingual.txt
+```
 
 O primeiro uso pode baixar modelos e demorar. Instale somente o mecanismo que pretende usar.
 
 ## Testes
+
+Na raiz:
 
 ```bash
 python -m pytest -q
@@ -69,34 +105,21 @@ python -m pytest -q
 Na pasta `extension`: `npm run typecheck` e `npm run build`.
 
 ## Documentação
-- `docs/ROADMAP.md`
-- `docs/ETAPA_2.md`
-- `docs/ETAPA_3.md`
+- `docs/ROADMAP.md` — visão geral do desenvolvimento.
+- `docs/ETAPA_2.md` — interface e detecção inicial.
+- `docs/ETAPA_3.md` — OCR e pipeline de imagem.
+- `docs/ETAPA_4.md` — endpoint de tradução e configuração do provedor.
 
 ## Limitações atuais
-- A detecção ainda usa heurísticas, não um classificador treinado.
+- A detecção de páginas ainda usa heurísticas de dimensões e proporção; não é um classificador treinado.
 - Captura via canvas pode falhar em imagens de outros domínios sem CORS.
-- O OCR japonês extrai texto da página sem caixas individuais por balão.
+- O OCR japonês atual extrai texto da página sem caixas individuais por balão.
 - OCR coreano/chinês/inglês fornece regiões e polígonos via EasyOCR.
-- Tradução contextual, detecção avançada de balões, remoção de texto, inpainting, lettering, leitor CBR/CBZ e processamento em lote ainda não foram implementados.
+- O endpoint de tradução recebe texto já extraído; a interface da extensão ainda precisa ser conectada ao fluxo de tradução.
+- Remoção de texto, inpainting, lettering e leitor CBR/CBZ ainda não foram implementados.
 
-## Privacidade
-- O backend escuta por padrão somente em `127.0.0.1`.
-- A imagem é enviada ao backend local configurado pela pessoa usuária.
-- Não versionar chaves de API ou segredos.
-- Não exponha o backend publicamente sem autenticação, proteção contra abuso e CORS apropriado.
-
----
-
-## Extensão alternativa com popup inspirado em tradutores imersivos
-
-Também há uma versão independente e simples, carregável diretamente pelo Chrome/Edge, na raiz do repositório. Ela inclui popup com idioma/modelo/escopo, botão flutuante em imagens, página de upload, opções e restauração da imagem original.
-
-### Testar a versão de popup
-1. Baixe ou clone o repositório.
-2. Abra `chrome://extensions` ou `edge://extensions`.
-3. Ative o modo do desenvolvedor.
-4. Clique em **Carregar sem compactação** e selecione a pasta raiz do repositório.
-5. Abra as configurações da extensão e informe a URL de um backend compatível com o contrato abaixo.
-
-O endpoint de tradução deve receber `POST` JSON com `image`, `targetLanguage` e `model`, e retornar `{ "translatedImage": "data:image/png;base64,..." }`. Esta interface é um protótipo funcional de extensão; a tradução efetiva depende da implementação e configuração do backend de OCR/tradução/inpainting. Tradução em lote e pré-tradução ainda estão no roadmap.
+## Privacidade e segurança
+- Por padrão, o backend escuta somente em `127.0.0.1`.
+- Nesta versão, a imagem é enviada somente ao backend local configurado pela pessoa usuária.
+- Não coloque chaves de API no código, no repositório ou em arquivos versionados.
+- Não exponha o backend publicamente sem autenticação, proteção contra abuso e configuração CORS apropriada.
