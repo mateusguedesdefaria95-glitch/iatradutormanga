@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -54,3 +56,29 @@ async def test_translate_texts_validates_provider_payload(monkeypatch):
     result = await translation.translate_texts(request)
     assert result["translations"] == ["Olá", "Tudo bem?"]
     assert result["target_language"] == "pt-BR"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "http://127.0.0.1.exemplo.com/v1/chat/completions",
+        "http://provider.example/v1/chat/completions",
+        "ftp://provider.example/v1/chat/completions",
+    ],
+)
+async def test_translate_texts_rejects_unsafe_provider_url(monkeypatch, endpoint):
+    monkeypatch.setenv("MANGA_TRANSLATION_API_KEY", "test-key")
+    monkeypatch.setenv("MANGA_TRANSLATION_API_URL", endpoint)
+    request = translation.TranslationRequest(texts=["こんにちは"], target_language="pt-BR")
+    with pytest.raises(translation.TranslationUnavailable):
+        await translation.translate_texts(request)
+
+
+@pytest.mark.skipif(bool(os.getenv("MANGA_ALLOWED_ORIGINS")), reason="MANGA_ALLOWED_ORIGINS definido no ambiente")
+def test_cors_does_not_allow_arbitrary_origins():
+    response = client.options(
+        "/translate",
+        headers={"Origin": "https://site-qualquer.example", "Access-Control-Request-Method": "POST"},
+    )
+    assert "access-control-allow-origin" not in response.headers

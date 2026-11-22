@@ -1,5 +1,6 @@
 import json
 import os
+from urllib.parse import urlparse
 
 import httpx
 from pydantic import BaseModel, Field, field_validator
@@ -22,6 +23,16 @@ class TranslationRequest(BaseModel):
         if sum(map(len, cleaned)) > 12000:
             raise ValueError("A soma dos textos não pode ultrapassar 12.000 caracteres.")
         return cleaned
+
+
+def _endpoint_allowed(endpoint: str) -> bool:
+    """Aceita HTTPS, ou HTTP somente para o próprio computador (testes locais)."""
+    parsed = urlparse(endpoint)
+    if not parsed.hostname:
+        return False
+    if parsed.scheme == "https":
+        return True
+    return parsed.scheme == "http" and parsed.hostname in {"127.0.0.1", "localhost"}
 
 
 class TranslationUnavailable(Exception):
@@ -48,7 +59,7 @@ async def translate_texts(request: TranslationRequest) -> dict:
         raise TranslationUnavailable(
             "Tradução não configurada. Defina MANGA_TRANSLATION_API_KEY no ambiente do backend."
         )
-    if not endpoint.startswith("https://") and not endpoint.startswith("http://127.0.0.1"):
+    if not _endpoint_allowed(endpoint):
         raise TranslationUnavailable("A URL do provedor deve usar HTTPS (ou localhost para testes).")
 
     system_prompt = (

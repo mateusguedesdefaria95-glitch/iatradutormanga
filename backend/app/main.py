@@ -10,8 +10,13 @@ from .translation import (
     translate_texts,
 )
 
-app = FastAPI(title="MangaTradutor AI API", version="0.4.0", description="Backend local para OCR e tradução de páginas de mangá.")
-allowed_origins = [origin.strip() for origin in os.getenv("MANGA_ALLOWED_ORIGINS", "*").split(",") if origin.strip()]
+API_VERSION = "0.7.0"
+
+app = FastAPI(title="MangaTradutor AI API", version=API_VERSION, description="Backend local para OCR e tradução de páginas de mangá.")
+# Por padrão nenhuma origem web é liberada: a extensão chama o backend pelo service worker,
+# que não depende de CORS para 127.0.0.1:8765. Libere origens explicitamente (separadas por
+# vírgula) apenas se precisar, por exemplo MANGA_ALLOWED_ORIGINS=chrome-extension://<id>.
+allowed_origins = [origin.strip() for origin in os.getenv("MANGA_ALLOWED_ORIGINS", "").split(",") if origin.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=allowed_origins, allow_credentials=False, allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 class OCRRequest(BaseModel):
@@ -23,7 +28,7 @@ async def health():
     return {
         "status": "ok",
         "service": "MangaTradutor AI API",
-        "version": "0.4.0",
+        "version": API_VERSION,
         "capabilities": ["image-ocr", "text-translation"],
         "translation_configured": bool(os.getenv("MANGA_TRANSLATION_API_KEY", "").strip()),
     }
