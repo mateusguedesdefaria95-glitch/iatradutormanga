@@ -89,16 +89,20 @@ O primeiro uso pode baixar modelos e demorar. Instale somente o mecanismo que pr
 
 ## Testes
 
-Na raiz:
+As dependências de teste (`pytest`, `pytest-asyncio`) e de execução (`fastapi`, `httpx`, `Pillow`) já estão em `backend/requirements.txt`; o `pip install -r backend/requirements.txt` da seção anterior basta. O arquivo `pytest.ini` aponta para `backend/tests` e adiciona a raiz ao caminho de importação.
+
+Na raiz, com o ambiente virtual ativo:
 
 ```bash
 python -m pytest -q
 ```
 
-Na pasta `extension`: `npm run typecheck` e `npm run build`.
+Os testes de OCR e tradução não exigem manga-ocr, EasyOCR nem chave de provedor: a tradução usa um cliente HTTP simulado.
+
+A pasta `extension/` (React/Vite) está incompleta e ainda não compila; veja `docs/ROADMAP.md`.
 
 ## Documentação
-- `docs/ROADMAP.md` — visão geral do desenvolvimento.
+- `docs/ROADMAP.md` — visão geral do desenvolvimento e pendências conhecidas.
 - `docs/ETAPA_3.md` — OCR e pipeline de imagem.
 - `docs/ETAPA_4.md` — endpoint de tradução.
 - `docs/ETAPA_5.md` — integração inicial entre extensão, OCR e tradução.
@@ -111,10 +115,15 @@ Na pasta `extension`: `npm run typecheck` e `npm run build`.
 - A tradução é exibida abaixo da imagem, não dentro dos balões.
 - Ainda não há remoção do texto original, inpainting, lettering ou leitor CBR/CBZ.
 - O lote processa apenas imagens HTML acessíveis e elegíveis; imagens protegidas por CORS podem falhar individualmente.
-- A extensão React/Vite ainda não foi consolidada com a interface simples da raiz.
+- Imagens exportadas em PNG pelo canvas podem passar do limite de 12 MB do backend (comum em tiras longas de manhwa).
+- No popup, as opções **Modelo**, **Alcance das imagens**, **Pré-traduzir próxima página** e o escopo do site são salvas, mas ainda não têm efeito. O modelo usado é o definido em `MANGA_TRANSLATION_MODEL` no backend. **Traduzir este site automaticamente** apenas exibe os botões "Traduzir".
+- A página de envio de imagens (`upload.html`) ainda não está integrada ao backend atual e não funciona.
+- A pasta `extension/` (React/Vite) está incompleta (sem ponto de entrada nem ícones) e não foi consolidada com a interface simples da raiz.
+- As versões ainda divergem: extensão da raiz 0.6.0, API do backend 0.4.0 e `extension/` 0.3.0.
 
 ## Privacidade e segurança
 - Por padrão, o backend escuta somente em `127.0.0.1`.
+- O CORS do backend aceita qualquer origem por padrão (`MANGA_ALLOWED_ORIGINS=*`), o que permite que sites abertos no navegador chamem a API local e consumam créditos do provedor. Defina `MANGA_ALLOWED_ORIGINS` com as origens permitidas sempre que possível.
 - Imagens são enviadas ao backend configurado pela pessoa usuária.
 - Não coloque chaves de API no código, na extensão, no repositório ou em arquivos versionados.
 - Não exponha o backend publicamente sem autenticação, proteção contra abuso e CORS apropriado.
