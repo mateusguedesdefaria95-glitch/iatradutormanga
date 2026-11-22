@@ -1,17 +1,19 @@
 # MangaTradutor AI
 
-Extensão para Chrome e Microsoft Edge com backend local para leitura assistida, OCR e tradução de páginas de mangá.
+Extensão para Chrome e Microsoft Edge com backend local para detecção de imagens, OCR e tradução de páginas de mangá.
 
-## Estado atual — backend v0.4.0
+## Estado do projeto — v0.5.0 (integração inicial)
 
 ### Extensão
 - Manifest V3 para Chrome e Edge.
-- Popup e página de configurações.
-- Preferências de idioma, qualidade e processamento.
-- Detecção heurística de imagens candidatas a páginas de mangá.
-- Seleção e destaque da imagem na página.
-- Captura da imagem selecionada via canvas e envio ao backend local para OCR.
-- Exibição do texto reconhecido no popup.
+- Popup com preferências de idioma, escopo e ações.
+- Página de configurações para URL do backend, idioma original e contexto da obra.
+- Verificação de conexão com o backend local.
+- Detecção heurística de imagens candidatas em páginas web.
+- Botão **Traduzir** sobre cada imagem detectada.
+- Fluxo integrado: captura da imagem → OCR → tradução dos trechos.
+- Exibição da tradução em um painel abaixo da imagem.
+- Remoção dos painéis de tradução pela ação Restaurar.
 
 ### Backend
 - API FastAPI local.
@@ -24,23 +26,24 @@ Extensão para Chrome e Microsoft Edge com backend local para leitura assistida,
 - Chaves de API mantidas no ambiente do backend, nunca na extensão.
 
 ## Requisitos
-- Node.js 20+ e npm 10+.
+- Node.js 20+ e npm 10+ (para a extensão React em `extension/`).
 - Python 3.11+.
 - Chrome ou Microsoft Edge.
 
-## Instalar e compilar a extensão
+## Carregar a extensão simples (raiz do repositório)
+1. Abra `chrome://extensions` ou `edge://extensions`.
+2. Ative o modo do desenvolvedor.
+3. Clique em **Carregar sem compactação** e selecione a pasta raiz do repositório.
+4. Abra as configurações da extensão e informe `http://127.0.0.1:8765`.
+5. Selecione o idioma original e salve.
+6. Inicie o backend e configure o provedor de tradução (instruções abaixo).
+7. Em uma página com imagens de mangá, clique no botão **Traduzir** sobre a imagem.
 
-```bash
-cd extension
-npm install
-npm run build
-```
-
-Carregue `extension/dist` em `chrome://extensions` ou `edge://extensions` com o modo de desenvolvedor ativado.
+> A extensão simples da raiz é a interface conectada ao fluxo OCR + tradução. A pasta `extension/` contém a implementação React/Vite em desenvolvimento; as duas interfaces ainda não foram consolidadas em um único pacote.
 
 ## Iniciar o backend
 
-Na raiz do projeto:
+Na raiz:
 
 ```bash
 python -m venv .venv
@@ -65,20 +68,9 @@ MANGA_TRANSLATION_API_URL=https://api.openai.com/v1/chat/completions
 MANGA_TRANSLATION_MODEL=gpt-4o-mini
 ```
 
-A URL e o modelo podem ser ajustados para um provedor compatível com o formato Chat Completions. A chave não deve ser enviada pela extensão nem salva no GitHub. Sem chave, OCR continua disponível, mas `POST /translate` responde com HTTP 503 e uma mensagem de configuração.
+A URL e o modelo podem ser ajustados para um provedor compatível com o formato Chat Completions. A chave não deve ser enviada pela extensão nem salva no GitHub. Sem chave, OCR continua disponível, mas `POST /translate` responde HTTP 503.
 
-Exemplo de requisição:
-
-```json
-{
-  "texts": ["こんにちは", "待って！"],
-  "source_language": "ja",
-  "target_language": "pt-BR",
-  "context": "Dois colegas conversando informalmente."
-}
-```
-
-### Instalar um mecanismo OCR
+### Instalar OCR
 
 Japonês:
 
@@ -106,20 +98,20 @@ Na pasta `extension`: `npm run typecheck` e `npm run build`.
 
 ## Documentação
 - `docs/ROADMAP.md` — visão geral do desenvolvimento.
-- `docs/ETAPA_2.md` — interface e detecção inicial.
 - `docs/ETAPA_3.md` — OCR e pipeline de imagem.
-- `docs/ETAPA_4.md` — endpoint de tradução e configuração do provedor.
+- `docs/ETAPA_4.md` — endpoint de tradução.
+- `docs/ETAPA_5.md` — integração inicial entre extensão, OCR e tradução.
 
-## Limitações atuais
-- A detecção de páginas ainda usa heurísticas de dimensões e proporção; não é um classificador treinado.
+## Limitações conhecidas
+- A detecção de páginas usa heurísticas; não é um classificador treinado.
 - Captura via canvas pode falhar em imagens de outros domínios sem CORS.
-- O OCR japonês atual extrai texto da página sem caixas individuais por balão.
-- OCR coreano/chinês/inglês fornece regiões e polígonos via EasyOCR.
-- O endpoint de tradução recebe texto já extraído; a interface da extensão ainda precisa ser conectada ao fluxo de tradução.
-- Remoção de texto, inpainting, lettering e leitor CBR/CBZ ainda não foram implementados.
+- OCR japonês retorna o texto da página como uma única região; OCR multilíngue pode retornar várias regiões.
+- A tradução é exibida abaixo da imagem, não dentro dos balões.
+- Ainda não há remoção do texto original, inpainting, lettering, tradução automática em lote nem leitor CBR/CBZ.
+- A extensão React/Vite ainda não foi consolidada com a interface simples da raiz.
 
 ## Privacidade e segurança
 - Por padrão, o backend escuta somente em `127.0.0.1`.
-- Nesta versão, a imagem é enviada somente ao backend local configurado pela pessoa usuária.
-- Não coloque chaves de API no código, no repositório ou em arquivos versionados.
-- Não exponha o backend publicamente sem autenticação, proteção contra abuso e configuração CORS apropriada.
+- Imagens são enviadas ao backend configurado pela pessoa usuária.
+- Não coloque chaves de API no código, na extensão, no repositório ou em arquivos versionados.
+- Não exponha o backend publicamente sem autenticação, proteção contra abuso e CORS apropriado.
